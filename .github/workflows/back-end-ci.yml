@@ -39,6 +39,11 @@ jobs:
           - 27017:27017
         env:
           MONGO_INITDB_DATABASE: appStoreTestDB
+        options: >-
+          --health-cmd mongo
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
       minio:
         image: orionsolaris/minio:2023-04-04 # using personal image that has extra cmd to run the minio s3 storage properly so tests will work
         ports:
