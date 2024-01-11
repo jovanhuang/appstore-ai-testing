@@ -10,6 +10,8 @@ from ..config.config import config
 from ..models.iam import TokenData
 from .dependencies.mongo_client import get_db
 
+KEYCLOAK_AUTHORIZATION_URL = "https://keycloak.apps-crc.testing/realms/CommonServices/protocol/openid-connect/auth"
+KEYCLOAK_TOKEN_URL = "https://keycloak.apps-crc.testing/realms/CommonServices/protocol/openid-connect/token"
 
 # Create a KeycloakOpenID instance for the Bearer-only client
 keycloak_bearer_only = KeycloakOpenID(
@@ -22,8 +24,8 @@ keycloak_bearer_only = KeycloakOpenID(
 )
 
 oauth2_scheme = OAuth2AuthorizationCodeBearer(
-    authorizationUrl= config.KEYCLOAK_AUTHORIZATION_URL,
-    tokenUrl= config.KEYCLOAK_TOKEN_URL
+    authorizationUrl= KEYCLOAK_AUTHORIZATION_URL,
+    tokenUrl= KEYCLOAK_TOKEN_URL
 )
 
 CREDENTIALS_EXCEPTION = HTTPException(
