@@ -1,0 +1,36 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: {{ engine_name }}
+  labels:
+    aas-ie-service: "true"
+spec:
+  template:
+    spec:
+      containers:
+        - image: {{ image_name }}
+          # imagePullPolicy: Always # TODO: uncomment when registry is properly set up
+          imagePullPolicy: IfNotPresent
+          {% if port %}
+          ports:
+            - containerPort: {{ port }}
+          {% endif %}
+          {% if env %}
+          env:
+          {% for key, value in env.items()  %}
+            - name: "{{ key|string }}"
+              value: "{{ value|string }}"
+          {% endfor %}
+          {% endif %}
+          resources:
+            limits:
+              nvidia.com/gpu: {{ num_gpus if num_gpus else 0 }}
+          # {% if resource_limits %}
+          # resources:
+          #   limits:
+          #     cpu: {{ resource_limits["cpu_cores"] }}
+          #     memory: {{ resource_limits["memory_gb"] }}G
+          #   requests:
+          #     cpu: 500m
+          #     memory: 1G
+          # {% endif %}

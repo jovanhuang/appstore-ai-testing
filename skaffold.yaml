@@ -1,0 +1,140 @@
+apiVersion: skaffold/v3
+kind: Config
+metadata:
+  name: aas-dependencies
+
+manifests:
+  rawYaml:
+    - k8s/namespaces.yaml
+deploy:
+  helm:
+    releases:
+      - name: ingress-nginx
+        version: 4.4.0
+        upgradeOnChange: false
+        chartPath: k8s/charts/dependencies/ingress-nginx
+        # repo: https://kubernetes.github.io/ingress-nginx
+        wait: true
+        valuesFiles:
+          - k8s/environments/development/cluster/ingress-nginx-values.yaml
+      - name: mongodb
+        # repo: https://charts.bitnami.com/bitnami
+        chartPath: k8s/charts/dependencies/mongodb
+        upgradeOnChange: false
+        version: 13.6.1
+        namespace: ai-appstore
+        createNamespace: true
+        valuesFiles:
+          - k8s/environments/development/mongodb-values.yaml
+        setValues:
+          nameOverride: "aas-mongodb"
+          fullnameOverride: "aas-mongodb"
+        wait: true
+      - name: minio
+        # repo: https://charts.min.io/
+        chartPath: k8s/charts/dependencies/minio
+        upgradeOnChange: false
+        namespace: ai-appstore
+        wait: true
+        valuesFiles:
+          - k8s/environments/development/minio-values.yaml
+      - name: emissary-crds
+        chartPath: k8s/charts/dependencies/emissary-crds
+      - name: emissary-ingress
+        upgradeOnChange: false
+        namespace: emissary
+        chartPath: k8s/charts/dependencies/emissary-ingress
+        createNamespace: true
+        valuesFiles:
+          - k8s/environments/development/emissary-values.yaml
+  kubectl: {}
+profiles:
+  - name: dev
+    activation:
+      - command: dev
+      - kubeContext: kind-(.*)  
+      - kubeContext: minikube
+      - kubeContext: k3d-(.*)
+    patches:
+      - op: add
+        path: /manifests/rawYaml/-
+        value: k8s/environments/development/cluster/metallb-config.yaml
+      - op: add
+        path: /manifests/rawYaml/-
+        value: k8s/environments/development/cluster/metallb-ip-address-pool.yaml
+      - op: add
+        path: /deploy/helm/releases/0
+        value:
+          name: metallb
+          repo: https://metallb.github.io/metallb
+          remoteChart: metallb
+          namespace: metallb-system
+          createNamespace: true
+          wait: true
+      - op: add
+        path: /manifests/rawYaml/-
+        value: k8s/environments/development/dashboard/dashboard.yaml
+      - op: add
+        path: /manifests/rawYaml/-
+        value: k8s/environments/development/dashboard/admin.yaml
+---
+apiVersion: skaffold/v3
+kind: Config
+metadata:
+  name: aas-main
+requires:
+  - configs: ["aas-dependencies"]
+    activeProfiles:
+      - name: dev
+        activatedBy: [dev]
+build:
+  local: {}
+  artifacts:
+    - image: aas-backend
+      context: back-end
+      docker:
+        dockerfile: Dockerfile
+        buildArgs:
+          ENV_STATE: prod
+    - image: aas-frontend
+      context: front-end
+      docker:
+        dockerfile: Dockerfile
+manifests: {}
+
+deploy:
+  helm:
+    releases:
+      # - name: aas-knative-backend
+      #   chartPath: k8s/charts/aas-knative-backend-private
+      #   namespace: inference-engine
+      #   upgradeOnChange: false
+      #   valuesFiles:
+      #     - k8s/environments/development/aas-knative-backend-values.yaml
+      - name: aas-frontend
+        chartPath: k8s/charts/aas-frontend
+        namespace: ai-appstore
+        setValueTemplates:
+          image.repository: "{{ .IMAGE_REPO_aas_frontend }}"
+          image.tag: "{{ .IMAGE_TAG_aas_frontend }}"
+        setValues:
+          image.pullPolicy: "IfNotPresent"
+        valuesFiles:
+          - k8s/environments/development/aas-frontend-values.yaml
+        wait: true
+      - name: aas-backend
+        chartPath: k8s/charts/aas-backend
+        namespace: ai-appstore
+        setValueTemplates:
+          image.repository: "{{ .IMAGE_REPO_aas_backend }}"
+          image.tag: "{{ .IMAGE_TAG_aas_backend }}"
+        setValues:
+          image.pullPolicy: "IfNotPresent"
+        valuesFiles:
+          - k8s/environments/development/aas-backend-values.yaml
+        wait: true
+profiles:
+  - name: dev
+    activation:
+      - command: dev
+      - kubeContext: kind-(.*)

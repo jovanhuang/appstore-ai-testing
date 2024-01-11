@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "inference-engine"
+version = "0.2.0"
+description = "Inference Engine library for AI App Store"
+authors = ["Tien-Cheng <tiencheng@protonmail.com>"]
+readme = "README.md"
+packages = [{include = "inference_engine"}]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+tritonclient = {extras = ["all"], version = "^2.27.0"}
+gradio = "2.9.4"
+
+[tool.poetry.group.dev.dependencies]
+black = "^22.8.0"
+isort = "^5.10.1"
+bandit = "^1.7.4"
+pytest = "^7.1.3"
+cookiecutter = "^2.1.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

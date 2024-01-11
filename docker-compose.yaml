@@ -1,0 +1,43 @@
+services:
+  back-end:
+    build:
+      context: "./back-end"
+      args:
+        - ENV_STATE=dev
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mongodb
+    env_file:
+      - ./back-end/src/config/.env
+    networks:
+      - appstore
+  mongodb:
+    image: mongo
+    restart: always
+    ports:
+      - "27016:27017"
+    environment:
+      - MONGO_INITDB_DATABASE=app_store
+    volumes:
+      - "./mongodb_data:/data/db"
+    networks:
+      - appstore
+
+  minio:
+    image: quay.io/minio/minio
+    restart: always
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - MINIO_ROOT_USER=aas-minio-uploader
+      - MINIO_ROOT_PASSWORD=TempPassword1234
+    volumes:
+      - "./minio_data:/data"
+    command: server /data --console-address ":9001"
+
+networks:
+  appstore:
+    driver: bridge
+    name: appstore

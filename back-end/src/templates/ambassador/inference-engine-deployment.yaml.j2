@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ engine_name }}-deployment
+  labels:
+    aas-ie-service: "true"
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: {{ engine_name }}
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: {{ engine_name }}
+        aas-ie-service: "true"
+    spec:
+      serviceAccountName: backend-service-engines
+      containers:
+        - name: {{ engine_name }}
+          image: {{ image_name }}
+          # imagePullPolicy: Always # TODO: uncomment when registry is properly set up
+          imagePullPolicy: Always
+          ports:
+            - containerPort: {{ port if port else 8080 }}
+          {% if env %}
+          env:
+          {% for key, value in env.items()  %}
+            - name: "{{ key|string }}"
+              value: "{{ value|string }}"
+          {% endfor %}
+          {% endif %}
+          readinessProbe:
+            tcpSocket:
+              port: {{ port if port else 8080 }}
+            initialDelaySeconds: 10
+            failuteThreshold: 50
+            periodSeconds: 15
+          livenessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 360
+            periodSeconds: 20
+          resources:
+            limits:
+              nvidia.com/gpu: {{ num_gpus if num_gpus else 0 }}
