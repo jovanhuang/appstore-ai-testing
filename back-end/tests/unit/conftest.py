@@ -67,6 +67,7 @@ async def s3_client(client: TestClient) -> Minio:
     from src.internal.dependencies.minio_client import minio_api_client
 
     s3_client = await minio_api_client()
+    print("s3_client: ", s3_client)
     return s3_client
 
 
