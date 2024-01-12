@@ -62,7 +62,7 @@ async def test_add_users(
     get_fake_db: Tuple[AsyncIOMotorDatabase, AsyncIOMotorClient],
     user: UserInsert,
 ):
-    db, _ = get_fake_db()
+    db, _ = get_fake_db
     await db.drop_collection("users")
     user_dict = user.dict()
     user_dict["password"] = user.password.get_secret_value()

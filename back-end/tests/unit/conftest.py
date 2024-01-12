@@ -50,6 +50,8 @@ def get_fake_db(client) -> Tuple[AsyncIOMotorDatabase, AsyncIOMotorClient]:
     from src.internal.dependencies.mongo_client import get_db
 
     db, db_client = get_db()
+    print("Hello, I am in pytest. db: ", db)
+    print("db_client: ", db_client)
     return db, db_client
 
 
