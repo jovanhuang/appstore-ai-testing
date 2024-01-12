@@ -18,30 +18,31 @@ async def minio_api_client() -> Optional[miniopy_async.Minio]:
     Returns:
         Optional[miniopy_async.Minio]: MinIO API Client. If connection fails, returns None.
     """
-    # try:
-    print(
-        f"{Fore.GREEN}INFO{Fore.WHITE}:\t  Attempting to connect to MinIO instance @ {config.MINIO_DSN}..."
-    )
-    minio_client = miniopy_async.Minio(
-        config.MINIO_DSN,  # use internal DNS name
-        config.MINIO_API_ACCESS_KEY,
-        config.MINIO_API_SECRET_KEY,
-        secure=config.MINIO_TLS,
-    )  # connect to minio using provided variables
-    print(f"{Fore.GREEN}INFO{Fore.WHITE}:\t  MinIO client connected!")
-    bucket_name = config.MINIO_BUCKET_NAME
-    print('finding bucket')
-    found_bucket = await minio_client.bucket_exists(bucket_name)
-    print("found_bucket: ", found_bucket)
-    # create the bucket from env variables if not already created
-    if not found_bucket:
-        await minio_client.make_bucket(bucket_name)
-        print(f"{Fore.GREEN}INFO{Fore.WHITE}:\t  Bucket '{bucket_name}' created")
-    else:
-        print(f"{Fore.GREEN}INFO{Fore.WHITE}:\t  Bucket '{bucket_name}' already exists")
-    return minio_client
-    # except :
-        # print(f"{Fore.YELLOW}WARNING{Fore.WHITE}:  Failed to connect to MinIO instance")
+    try:
+        print(
+            f"{Fore.GREEN}INFO{Fore.WHITE}:\t  Attempting to connect to MinIO instance @ {config.MINIO_DSN}..."
+        )
+        minio_client = miniopy_async.Minio(
+            config.MINIO_DSN,  # use internal DNS name
+            config.MINIO_API_ACCESS_KEY,
+            config.MINIO_API_SECRET_KEY,
+            secure=config.MINIO_TLS,
+        )  # connect to minio using provided variables
+        print(f"{Fore.GREEN}INFO{Fore.WHITE}:\t  MinIO client connected!")
+        bucket_name = config.MINIO_BUCKET_NAME
+        print('finding bucket')
+        found_bucket = await minio_client.bucket_exists(bucket_name)
+        print("found_bucket: ", found_bucket)
+        # create the bucket from env variables if not already created
+        if not found_bucket:
+            await minio_client.make_bucket(bucket_name)
+            print(f"{Fore.GREEN}INFO{Fore.WHITE}:\t  Bucket '{bucket_name}' created")
+        else:
+            print(f"{Fore.GREEN}INFO{Fore.WHITE}:\t  Bucket '{bucket_name}' already exists")
+        return minio_client
+    except Exception as e:
+        print(f"{Fore.YELLOW}WARNING{Fore.WHITE}:  Failed to connect to MinIO instance")
+        print("Exception error e: ", e)
 
 
 async def get_presigned_url(client: miniopy_async.Minio, object_name: str, bucket_name: str) -> str:
