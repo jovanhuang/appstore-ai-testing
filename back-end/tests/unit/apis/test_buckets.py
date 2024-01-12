@@ -17,6 +17,9 @@ BUCKET_NAME = config.MINIO_BUCKET_NAME
 @pytest.mark.usefixtures("flush_s3")
 @pytest.mark.parametrize("file_path", ["./test_data/video1.mp4"])
 async def test_upload_video(file_path: str, client: TestClient, s3_client: Minio):
+    print("file_path: ", file_path)
+    print("client: ", client)
+    print("s3_client: ", s3_client)
     # Check that s3 is empty at start
     objects = await s3_client.list_objects(BUCKET_NAME, recursive=True)  # type: ignore #ignore
     assert len(objects) == 0  # type: ignore #ignore
