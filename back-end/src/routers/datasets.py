@@ -62,10 +62,13 @@ def search_datasets(
         List[Dict]: List of dataset metadata
     """
     datasets = []
+    print('connectors (before): ', connectors)
     if connectors is None:
         connectors = [
             connector.value for connector in Connector if connector.value != ""
         ]
+    
+    print('connectors (after): ', connectors)
     for connector in connectors:
         datasets.extend(
             Dataset.from_connector(connector).list_datasets(
@@ -75,6 +78,7 @@ def search_datasets(
                 ids=query.id,
             )
         )
+    print('datasets: ', datasets)
     return datasets
 
 
