@@ -14,6 +14,7 @@ def test_get_all_datasets(
     response = client.post("/datasets/search", json={})
     response_json = response.json()
     print('response.status_code: ', response.status_code)
+    print('response.text: ', response.text)
     assert response.status_code == status.HTTP_200_OK
     assert isinstance(response_json, list)
     # might be more than 2 if fail to clean up test
