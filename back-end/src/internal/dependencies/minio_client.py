@@ -30,7 +30,9 @@ async def minio_api_client() -> Optional[miniopy_async.Minio]:
         )  # connect to minio using provided variables
         print(f"{Fore.GREEN}INFO{Fore.WHITE}:\t  MinIO client connected!")
         bucket_name = config.MINIO_BUCKET_NAME
-        print('minio_client: ', minio_client)
+        print('MINIO_DSN: ', config.MINIO_DSN)
+        print('MINIO_API_ACCESS_KEY: ', config.MINIO_API_ACCESS_KEY)
+        print('MINIO_API_SECRET_KEY: ', config.MINIO_API_SECRET_KEY)
         print('finding bucket')
         found_bucket = await minio_client.bucket_exists(bucket_name)
         print("found_bucket: ", found_bucket)
