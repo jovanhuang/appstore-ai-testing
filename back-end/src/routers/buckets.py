@@ -56,6 +56,7 @@ async def upload_video(
     Returns:
         Dict[str, str]: Location of the video in the bucket
     """
+    print("buckets.py: uploading video...")
     try:
         path = await upload_data(
             s3_client,
