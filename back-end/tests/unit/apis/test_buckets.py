@@ -19,9 +19,10 @@ BUCKET_NAME = config.MINIO_BUCKET_NAME
 async def test_upload_video(file_path: str, client: TestClient, s3_client: Minio):
     # Check that s3 is empty at start
     objects = await s3_client.list_objects(BUCKET_NAME, recursive=True)  # type: ignore #ignore
+    print('objects: ', objects)
     assert len(objects) == 0  # type: ignore #ignore
     response = client.post(
-        "/buckets/video",
+        "/buckets/model-zoo",
         files={"video": open(Path(__file__).parent.joinpath(file_path), "rb")},
     )
     data = response.json()
