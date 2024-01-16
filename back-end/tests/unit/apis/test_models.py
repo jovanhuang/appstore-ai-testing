@@ -283,7 +283,6 @@ def test_update_model_card_not_found(
 #     # Check that database has actually been emptied
 #     assert len((await db["models"].find().to_list(length=None))) == 0
 
-
 @pytest.mark.asyncio
 @pytest.mark.usefixtures("flush_db")
 async def test_delete_model_card_metadata_unauthorized(
